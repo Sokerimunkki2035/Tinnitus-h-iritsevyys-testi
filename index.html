@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinnituksen haitta-aste (THI) & Arjen seuranta</title>
+    <style>
+        :root {
+            --primary-color: #005a9c;
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dcdcdc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px 10px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+        }
+
+        p.intro {
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .question-card {
+            background-color: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .question-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .options label {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options input[type="radio"]:checked + span {
+            font-weight: bold;
+        }
+
+        .options label:has(input[type="radio"]:checked) {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        textarea.notes-input {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: background 0.2s;
+        }
+
+        button.submit-btn:hover {
+            background-color: #004070;
+        }
+
+        #result-area {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #eef6fc;
+            border: 2px solid var(--primary-color);
+        }
+
+        .result-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .copy-btn {
+            background: #ffffff;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .history-box {
+            margin-top: 25px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .history-box h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        ul#history-list {
+            padding-left: 20px;
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+        
+        ul#history-list li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Tinnituksen haitta-aste (THI)</h1>
+    <p class="intro">Tämä kysely arvioi tinnituksen vaikutusta arkeesi ja hermostoosi. Voit tehdä mittauksen kuukausiseurannan lisäksi myös silloin, kun koet äkillisen stressipiikin tai oireiden voimakkaan pahenemisen.</p>
+
+    <form id="tinnitus-form">
+        <!-- THI Kysymykset -->
+        <div class="section-title">Osa 1: Tinnitus Handicap Inventory (THI)</div>
+        <div id="thi-questions"></div>
+
+        <!-- Lisäkysymykset -->
+        <div class="section-title">Osa 2: Arjen tukitarpeet & Hermosto</div>
+
+        <div class="question-card">
+            <div class="question-title">1. Uskotko tai tunnetko, että peiteäänellä / maskeeraustoiminnolla varustetusta kuulolaitteesta olisi sinulle apua?</div>
+            <div class="options">
+                <label><input type="radio" name="extra1" value="Kyllä" required><span>Kyllä</span></label>
+                <label><input type="radio" name="extra1" value="Ehkä"><span>Ehkä</span></label>
+                <label><input type="radio" name="extra1" value="Ei"><span>Ei</span></label>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-title">2. Onko ulkoinen äänilähde (esim. sirkkaäänet, peiteääni, musiikki, tuuletin) päällä joka päivä tinnituksen peittämiseksi?</div>
+            <div class="options">
+                <label><input type="radio" name="extra2" value="Kyllä, vuorokauden ympäri" required><span>Vuorokauden ympäri</span></label>
+                <label><input type="radio" name="extra2" value="Kyllä, osan päivästä / öisin"><span>Osittain / Öisin</span></label>
+                <label><input type="radio" name="extra2" value="Ei"><span>Ei</span></label>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-title">3. Kuinka monena päivänä viimeisen 7 päivän aikana hermostosi on ollut ylikierroksilla tai ylivirittynyt tinnituksen / kuormituksen vuoksi?</div>
+            <div class="options" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                <label><input type="radio" name="extra3" value="0 päivänä" required><span>0</span></label>
+                <label><input type="radio" name="extra3" value="1–2 päivänä"><span>1–2</span></label>
+                <label><input type="radio" name="extra3" value="3–4 päivänä"><span>3–4</span></label>
+                <label><input type="radio" name="extra3" value="5–7 päivänä"><span>5–7</span></label>
+            </div>
+        </div>
+
+        <!-- Uusi muistiinpanokenttä -->
+        <div class="question-card">
+            <div class="question-title">4. Muistiinpanot / syyt tälle mittaukselle (esim. äkillinen stressi, elämäntilanteen kuormitus):</div>
+            <textarea id="user-notes" class="notes-input" placeholder="Kirjoita tähän lyhyesti, jos taustalla on esimerkiksi poikkeuksellinen stressitilanne tai muu syy..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Laske tulos ja tallenna seurantaan</button>
+    </form>
+
+    <!-- Tulokset -->
+    <div id="result-area">
+        <h2>Seurannan tulos (<span id="date-display"></span>)</h2>
+        <p>THI-Kokonaispisteet: <span class="result-score" id="score-display">0</span> / 100 p</p>
+        <p>Haitta-aste: <span id="grade-display" class="badge"></span></p>
+        <p id="grade-desc"></p>
+
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 20px 0;">
+
+        <h3>Arjen tilannekatsaus:</h3>
+        <ul>
+            <li><strong>Peiteäänilaiteapu:</strong> <span id="res-extra1"></span></li>
+            <li><strong>Äänilähteen käyttö:</strong> <span id="res-extra2"></span></li>
+            <li><strong>Hermoston ylikierrokset (7 vrk):</strong> <span id="res-extra3"></span></li>
+            <li><strong>Huomiot / Stressitekijät:</strong> <span id="res-notes">Ei kirjattu</span></li>
+        </ul>
+
+        <button class="copy-btn" onclick="copyResults()">Kopioi tulokset ja huomiot leikepöydälle</button>
+
+        <div class="history-box">
+            <h3>Aiemmat tallennetut tulokset laitteella:</h3>
+            <ul id="history-list">
+                <li>Ei aikaisempia tallennuksia tällä laitteella.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+const thiQuestionsData = [
+    "Onko sinun vaikea keskittyä tinnituksen vuoksi?",
+    "Onko tinnituksen voimakkuus tehnyt sinulle vaikeaksi kuulla ihmisten puhetta?",
+    "Aiheuttaako tinnitus sinussa suuttumusta tai ärtymystä?",
+    "Tuntuuko sinusta, että tinnitus saattaa sinut sekaisin?",
+    "Koetko tinnituksen vuoksi toivottomuutta?",
+    "Valitatko paljon tinnituksesta?",
+    "Onko sinulla nukahtamisvaikeuksia tinnituksen vuoksi öisin?",
+    "Tuntuuko sinusta, ettet pysty pakenemaan tinnitusta?",
+    "Häiritseekö tinnitus sosiaalista elämääsi (kömpiikö vetäytymistä)?",
+    "Tuntuuko sinusta, ettet kykene pakenemaan tinnituksen aiheuttamaa stressiä?",
+    "Tuntuuko sinusta, että sinulla on vakava sairaus tinnituksen vuoksi?",
+    "Tekeekö tinnitus elämästäsi nauttimisesta vaikeaa?",
+    "Häiritseekö tinnitus työntekoasi tai kotitöitäsi?",
+    "Huomaatko olevasi usein ärtynyt tinnituksen vuoksi?",
+    "Onko sinun vaikea lukea tinnituksen vuoksi?",
+    "Aiheuttaako tinnitus sinulle henkistä ahdistusta?",
+    "Tuntuuko sinusta, että tinnitus heikentää ihmissuhteitasi perheen ja ystävien kanssa?",
+    "Onko sinun vaikea kääntää huomiotasi pois tinnituksesta muihin asioihin?",
+    "Tuntuuko sinusta, ettet hallitse tinnitustasi?",
+    "Tekeekö tinnitus sinut väsyneeksi?",
+    "Tuntuuko sinusta, että tinnitus tekee sinusta masentuneen?",
+    "Tekeekö tinnitus sinusta ahdistuneen?",
+    "Tuntuuko sinusta, ettet enää kykene selviytymään tinnituksen kanssa?",
+    "Paheneeko tinnitus silloin, kun olet stressaantunut?",
+    "Tekeekö tinnitus olosi epävarmaksi?"
+];
+
+// Generoidaan kysymykset dynaamisesti
+const container = document.getElementById('thi-questions');
+thiQuestionsData.forEach((q, index) => {
+    const qNum = index + 1;
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.innerHTML = `
+        <div class="question-title">${qNum}. ${q}</div>
+        <div class="options">
+            <label><input type="radio" name="q${qNum}" value="4" required><span>Kyllä (4p)</span></label>
+            <label><input type="radio" name="q${qNum}" value="2"><span>Joskus (2p)</span></label>
+            <label><input type="radio" name="q${qNum}" value="0"><span>Ei (0p)</span></label>
+        </div>
+    `;
+    container.appendChild(card);
+});
+
+// Ladataan historia sivun latautuessa
+updateHistoryDisplay();
+
+let latestResultsText = "";
+
+document.getElementById('tinnitus-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    let totalScore = 0;
+    for (let i = 1; i <= 25; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+            totalScore += parseInt(selected.value);
+        }
+    }
+
+    // Luokitus
+    let grade = "";
+    let desc = "";
+    let color = "";
+
+    if (totalScore <= 16) {
+        grade = "Kategoria I: Lievä / Ei haittaa";
+        desc = "Tinnitus kuuluu vain hiljaisessa ympäristössä eikä juuri häiritse arkea.";
+        color = "#2a9d8f";
+    } else if (totalScore <= 36) {
+        grade = "Kategoria II: Lievä haitta";
+        desc = "Tinnitus peittyy helposti taustaäänillä ja on helposti unohdettavissa toiminnassa.";
+        color = "#e9c46a";
+    } else if (totalScore <= 56) {
+        grade = "Kategoria III: Kohtalainen haitta";
+        desc = "Tinnitus kuuluu taustaäänien läpi ja häiritsee päivittäisiä toimia sekä unta.";
+        color = "#f4a261";
+    } else if (totalScore <= 76) {
+        grade = "Kategoria IV: Vaikea haitta";
+        desc = "Tinnitus kuuluu lähes aina, häiritsee merkittävästi unta ja rajoittaa normaalia arkea.";
+        color = "#e76f51";
+    } else {
+        grade = "Kategoria V: Erittäin vaikea (Katastrofaalinen)";
+        desc = "Tinnitus aiheuttaa suurta haittaa kaikilla elämänalueilla, unettomuutta ja voimakasta hermoston kuormitusta.";
+        color = "#e63946";
+    }
+
+    const today = new Date().toLocaleDateString('fi-FI');
+
+    // Näytetään tulokset
+    document.getElementById('date-display').innerText = today;
+    document.getElementById('score-display').innerText = totalScore;
+    const badge = document.getElementById('grade-display');
+    badge.innerText = grade;
+    badge.style.backgroundColor = color;
+    document.getElementById('grade-desc').innerText = desc;
+
+    const ex1 = document.querySelector('input[name="extra1"]:checked').value;
+    const ex2 = document.querySelector('input[name="extra2"]:checked').value;
+    const ex3 = document.querySelector('input[name="extra3"]:checked').value;
+    const notes = document.getElementById('user-notes').value.trim();
+
+    document.getElementById('res-extra1').innerText = ex1;
+    document.getElementById('res-extra2').innerText = ex2;
+    document.getElementById('res-extra3').innerText = ex3;
+    document.getElementById('res-notes').innerText = notes ? notes : "Ei kirjattu";
+
+    latestResultsText = `TINNITUS SEURANTA (${today}):\nTHI-pisteet: ${totalScore}/100 p (${grade})\n- Laiteapu tarve: ${ex1}\n- Äänilähde käytössä: ${ex2}\n- Hermosto ylikierroksilla (7 vrk): ${ex3}\n- Huomiot / Stressi: ${notes ? notes : "Ei kirjattu"}`;
+
+    // Tallennetaan localStorageen
+    saveToHistory(today, totalScore, grade, notes);
+
+    document.getElementById('result-area').style.display = 'block';
+    document.getElementById('result-area').scrollIntoView({ behavior: 'smooth' });
+});
+
+function saveToHistory(date, score, grade, notes) {
+    let history = JSON.parse(localStorage.getItem('tinnitus_history') || '[]');
+    history.unshift({ date, score, grade, notes }); // Lisätään listan alkuun
+    if (history.length > 5) history.pop(); // Säilytetään max 5 viimeisintä
+    localStorage.setItem('tinnitus_history', JSON.stringify(history));
+    updateHistoryDisplay();
+}
+
+function updateHistoryDisplay() {
+    let history = JSON.parse(localStorage.getItem('tinnitus_history') || '[]');
+    const listEl = document.getElementById('history-list');
+    if (history.length === 0) {
+        listEl.innerHTML = '<li>Ei vielä aikaisempia tallennuksia.</li>';
+        return;
+    }
+    listEl.innerHTML = '';
+    history.forEach(item => {
+        const li = document.createElement('li');
+        let noteText = item.notes ? `<br><small style="color: #666;">Huomio: ${item.notes}</small>` : '';
+        li.innerHTML = `<strong>${item.date}</strong>: ${item.score}/100 p (${item.grade})${noteText}`;
+        listEl.appendChild(li);
+    });
+}
+
+function copyResults() {
+    if (!latestResultsText) return;
+    navigator.clipboard.writeText(latestResultsText).then(() => {
+        alert("Tulokset, päivämäärä ja huomiot kopioitu leikepöydälle!");
+    });
+}
+</script>
+
+</body>
+</html>
